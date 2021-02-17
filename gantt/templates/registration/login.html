@@ -17,6 +17,8 @@
   {% endif %}  
   <div class="row">
     <div class="col-lg-4 col-md-6 col-sm-8 col-12">
+      <div class="card">
+      <div class="card-body">
       <h2>Log in</h2>      
       <form method="post" novalidate>
         {% csrf_token %}
@@ -26,6 +28,29 @@
         <button type="submit" class="btn btn-primary">Log in</button>
         <p><a href="{% url 'password_reset' %}">I forgot my password</a></p>
       </form>
+    </div>
+  </div>
+    </div>
+    <div class="col-md-6 col-lg-8">
+      <div class="card">
+      <div class="card-body">
+      <p class="lead">Sample User Accounts and their credentials</p>
+      <ul> <strong>Admin User - can create other users</strong>
+        <li>username: <code>admin</code></li>
+        <li>password: <code>admin</code></li>
+      </ul>
+      <hr>
+      <ul> <strong>Creator - can create/view Projects</strong>
+        <li>username: <code>creator</code></li>
+        <li>password: <code>suhail412</code></li>
+      </ul>
+      <hr>
+      <ul> <strong>Viewer - only view Projects</strong>
+        <li>username: <code>viewer</code></li>
+        <li>password: <code>suhail412</code></li>
+      </ul>
+    </div>
+      </div>
     </div>
   </div>
   <!--

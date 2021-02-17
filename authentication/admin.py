@@ -6,5 +6,10 @@ from django.contrib.auth.admin import UserAdmin
 # class UserAdmin(admin.ModelAdmin):
 #     search_fields = ('username', )
 
+class CustomUserAdmin(UserAdmin):
+    fieldsets = (
+        *UserAdmin.fieldsets,  # original form fieldsets, expanded
+        ('User Type', {'fields': ('user_type',),},),
+    )
 
-admin.site.register(get_user_model(), UserAdmin)
+admin.site.register(get_user_model(), CustomUserAdmin)

@@ -36,7 +36,7 @@ class ProjectCreateView(CreatorRequiredMixin, CreateView):
         return redirect('projects:project_list')
 
 
-class ProjectGanttView(CreatorRequiredMixin, View):
+class ProjectGanttView(LoginRequiredMixin, View):
     template_name = 'projects/graph.html'
 
     def get(self, request, *args, **kwargs):
