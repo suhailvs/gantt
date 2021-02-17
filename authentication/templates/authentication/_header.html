@@ -1,0 +1,10 @@
+
+<ul class="nav nav-pills mb-3">  
+  <li class="nav-item">
+    <a class="nav-link{% if active == 'profile' %} active{% endif %}" href="{% url 'authentication:profile' %}">Profile</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link{% if active == 'change_password' %} active{% endif %}" href="{% url 'authentication:change_password' %}">Change password</a>
+  </li>
+</ul>
+<hr>

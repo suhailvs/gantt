@@ -22,6 +22,7 @@ from projects.views import home
 urlpatterns = [
 	path('', home, name='home'),
     path('admin/', admin.site.urls),
+    path('authentication/', include('authentication.urls')),
     path('projects/', include('projects.urls')),
 
 
