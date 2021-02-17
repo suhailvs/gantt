@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block css %}
+<link rel="stylesheet" type="text/css" href="{% static 'datatables/dataTables.bootstrap4.min.css' %}">
+{% endblock %}
+
+{% block content %}
+  {% if request.user.is_creator %}
+    <a class="btn btn-success" href="{% url 'projects:project_add' %}"><i class="fas fa-plus"></i> Add Project</a>
+  {% endif %}
+  <a href="{% url 'projects:project_gantt' %}" class="btn btn-info"><i class="fas fa-chart-bar"></i> View Chart</a>
+  <hr>
+  <div class="card"> 
+    <table class="table table-bordered mb-0" id="tb_projectlist">
+      <thead>
+
+      <tr>
+        <th>Project</th>
+        <th class="d-none d-sm-table-cell">Name</th>
+        <th class="d-none d-sm-table-cell">Start Date</th>
+        <th class="d-none d-sm-table-cell">End Date</th>
+        <th class="d-none d-sm-table-cell">Progress</th>
+        <th class="d-none d-sm-table-cell">Dependencies</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for project in object_list %}
+        <tr{% if project.owner == request.user %} style="background: #fdf7e3"{%endif%}>
+          <td class="align-middle">{{ project.project_id }}</td>
+          <td class="align-middle d-none d-sm-table-cell">{{ project.name }}</td>
+          <td class="align-middle d-none d-sm-table-cell">{{ project.start_date }}</td>
+          <td class="align-middle d-none d-sm-table-cell">{{ project.end_date }}</td>
+          <td class="align-middle d-none d-sm-table-cell">{{ project.progress }}</td>
+          <td class="align-middle d-none d-sm-table-cell">{{ project.dependencies }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}
+
+{% block js %}
+<script src="{% static 'datatables/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'datatables/dataTables.bootstrap4.min.js' %}"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+    $('#tb_projectlist').DataTable({"order": [[ 1, "desc" ]]});
+});
+</script>
+{% endblock %}
+
+

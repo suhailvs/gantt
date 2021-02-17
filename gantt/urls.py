@@ -17,11 +17,14 @@ from django.contrib import admin
 from django.urls import path,include
 
 from django.contrib.auth import views as auth_views
-from authentication.views import home
+from projects.views import home
 
 urlpatterns = [
 	path('', home, name='home'),
     path('admin/', admin.site.urls),
+    path('projects/', include('projects.urls')),
+
+
     path('accounts/login/', auth_views.LoginView.as_view(redirect_authenticated_user=True), name='login'),
     path('accounts/', include('django.contrib.auth.urls')),
 ]

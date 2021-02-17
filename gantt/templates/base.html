@@ -5,14 +5,12 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    
-    
     <!-- Bootstrap core CSS -->
     <link rel="stylesheet" href="{% static 'bootstrap/bootstrap.min.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/app.css' %}">
+    <script src="https://kit.fontawesome.com/eb07455b20.js" crossorigin="anonymous"></script>
     <!-- Custom styles for this template -->  
-
-    {% block extracss %}
+    <title>Simple Gantt</title>
+    {% block css %}
     {% endblock %}
   </head>
 
@@ -33,9 +31,9 @@
       
       <div class="card">
         <div class="card-header">
-          
-          
-         
+          {% if user.is_authenticated %}
+          {% include 'nav.html' %}
+          {% endif %}
         </div>
         <div class="card-body" style="min-height: 500px;">          
           {% for message in messages %}
@@ -57,7 +55,7 @@
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="{% static 'js/jquery-3.3.1.min.js' %}"></script>
-    {% block extrajs %}
+    {% block js %}
     {% endblock %}
   </body>
 </html>

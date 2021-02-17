@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block css %}
+<link rel="stylesheet" type="text/css" href="{% static 'frappe/frappe-gantt.css' %}">
+<style type="text/css">
+    .gantt .bar-milestone .bar {
+            fill: tomato;
+        }
+        .gantt_container {
+            width: 80%;
+            margin: 0 auto;
+        }
+</style>
+{% endblock %}
+
+{% block content %}
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'projects:project_list' %}">Projects</a></li>
+      <li class="breadcrumb-item active" aria-current="page">View project</li>
+    </ol>
+  </nav>
+
+    <div class="mx-auto mt-3 btn-group" role="group">
+      <button type="button" class="btn btn-sm btn-light active">Quarter Day</button>
+      <button type="button" class="btn btn-sm btn-light">Half Day</button>
+      <button type="button" class="btn btn-sm btn-light">Day</button>
+      <button type="button" class="btn btn-sm btn-light">Week</button>
+      <button type="button" class="btn btn-sm btn-light">Month</button>
+    </div>
+    <div class="gantt_container" style="overflow: scroll"><svg id="gantt"></svg></div>  
+{% endblock %}
+
+
+{% block js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.min.js"></script>
+<script src="{% static 'frappe/snap.svg.js' %}"></script>
+<script src="{% static 'frappe/frappe-gantt-0.0.7.js' %}"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+    console.log('asdf');
+    //"{{ data|safe }}";
+    var projects = {{projects|safe}};
+    // var tasks = [
+    //         {
+    //             start: '2018-10-01',
+    //             end: '2018-10-08',
+    //             name: 'Redesign website',
+    //             id: "Task 0",
+    //             progress: 20
+    //         }]
+    var gantt = new Gantt("#gantt", projects, {            
+        on_date_change: function(task, start, end) {                
+            alert(end);
+        },
+        on_progress_change: function(task, progress) {
+            alert(progress);
+        }
+    });
+
+    
+    $(".btn-group").on("click", "button", function() {
+        $btn = $(this);
+        var mode = $btn.text();
+        gantt.change_view_mode(mode);
+        $btn.parent().find('button').removeClass('active');
+            $btn.addClass('active');
+    });
+});
+</script>
+{% endblock %}
