@@ -72,4 +72,5 @@ def home(request):
 
 from django.http import HttpResponse
 def oauth(request):
-    return HttpResponse(f'<pre>POST: {request.POST}, GET: {request.GET}</pre>')
+    code = request.GET.get('code')
+    return HttpResponse(f"authorization code: {code}")
