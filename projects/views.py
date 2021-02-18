@@ -8,16 +8,6 @@ from projects.models import Project
 from authentication.mixins import CreatorRequiredMixin
 
 
-def home(request):
-    if not request.user.is_authenticated: 
-        return redirect('login')
-    if request.user.is_superuser:
-        return redirect('admin:index')
-
-    if request.user.is_creator:
-        pass
-
-    return redirect('projects:project_list')
 
 class ProjectListView(LoginRequiredMixin, ListView):
     model = Project

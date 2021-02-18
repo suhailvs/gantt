@@ -56,3 +56,20 @@ def change_password_view(request):
     return render(request, 'authentication/change_password.html', {
         'form': form
     })
+
+
+
+def home(request):
+    if not request.user.is_authenticated: 
+        return redirect('login')
+    if request.user.is_superuser:
+        return redirect('admin:index')
+
+    if request.user.is_creator:
+        pass
+
+    return redirect('projects:project_list')
+
+from django.http import HttpResponse
+def oauth(request):
+    return HttpResponse(f'<pre>POST: {request.POST}, GET: {request.GET}</pre>')
