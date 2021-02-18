@@ -10,6 +10,8 @@
     <a class="btn btn-success" href="{% url 'projects:project_add' %}"><i class="fas fa-plus"></i> Add Project</a>
   {% endif %}
   <a href="{% url 'projects:project_gantt' %}" class="btn btn-info"><i class="fas fa-chart-bar"></i> View Chart</a>
+
+  <a href="{% url 'projects:google_sheets' %}" class="btn btn-info"><i class="fas fa-file-excel"></i> </a>
   <hr>
   <div class="card"> 
     <table class="table table-bordered mb-0" id="tb_projectlist">

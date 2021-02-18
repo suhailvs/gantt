@@ -15,3 +15,14 @@ class Project(models.Model):
 
     def __str__(self):
         return self.name
+
+class GoogleDriveAuth(models.Model):
+    key =  models.TextField()
+    token_id = models.TextField(blank=True)
+    access_token = models.TextField()
+    refresh_token =  models.TextField()
+    client_id = models.TextField()
+    client_secret =  models.TextField()
+    token_start_time = models.DateTimeField(auto_now_add = True)
+    token_expiry_time = models.IntegerField(null=True,blank=True)
+    status = models.BooleanField(default=True)
