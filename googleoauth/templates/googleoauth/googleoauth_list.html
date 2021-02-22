@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% include 'googleoauth/nav.html' %}
+<hr>
+<h3>Google API Credentials</h3>
+<a class="btn btn-sm btn-success mb-3" href="{% url 'googleoauth:credential_add' %}"><i class="fas fa-plus"></i> Add New</a>
+<div class="row">
+  <div class="col-md-6">
+{% for cred in object_list %}
+<div class="card{% if cred.status %} border-success{%endif%} mb-3">
+  <div class="card-header">
+    {{ cred.name }}
+  </div>
+  <div class="card-body">
+    <code>{{ cred.scopes }}</code>
+  </div>
+  <ul class="list-group list-group-flush">
+    <li class="list-group-item">{{ cred.client_secret_filename }}</li>
+    <li class="list-group-item"><a href="#">{{ cred.redirect_uri }}</a></li>
+    <li class="list-group-item">{{ cred.client_id }}</li>
+  </ul>
+  <div class="card-body">
+    <p class="card-text">Client Secret: {{ cred.client_secret }}</p>
+  </div>
+</div>
+{% endfor %}
+</div>
+</div>
+{% endblock %}
+
+
+
+
+

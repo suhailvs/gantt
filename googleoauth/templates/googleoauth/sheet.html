@@ -1,0 +1,33 @@
+
+
+{% extends 'base.html' %}
+
+{% block content %}
+	{% include 'googleoauth/nav.html' %}
+
+  <div class="card"> 
+  	# Print columns A and B, which correspond to indices 0 and 1.
+
+  	<table class="table table-bordered mb-0">
+      <thead>
+
+      <tr>
+        <th>#</th>
+        <th>A</th>
+        <th>B</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in values %}
+
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td>{{ row.0 }}</td>
+          <td>{{ row.1 }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    
+  </div>
+{% endblock %}

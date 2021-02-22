@@ -18,13 +18,15 @@ from django.urls import path,include
 
 from django.contrib.auth import views as auth_views
 from authentication import views
+from googleoauth.views import OAuth2CallbackView
 
 urlpatterns = [
     path('', views.home, name='home'),
     path('admin/', admin.site.urls),
     path('authentication/', include('authentication.urls')),
     path('projects/', include('projects.urls')),
-    path('oauthredirect/',views.oauth),
+    path('googleoauth/', include('googleoauth.urls')),
+    path('oauthredirect/',OAuth2CallbackView.as_view()),
 
     path('accounts/login/', auth_views.LoginView.as_view(redirect_authenticated_user=True), name='login'),
     path('accounts/', include('django.contrib.auth.urls')),

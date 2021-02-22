@@ -69,8 +69,3 @@ def home(request):
         pass
 
     return redirect('projects:project_list')
-
-from django.http import HttpResponse
-def oauth(request):
-    code = request.GET.get('code')
-    return HttpResponse(f"authorization code: {code}")

@@ -33,7 +33,7 @@ ALLOWED_HOSTS = ['*']
 INSTALLED_APPS = [
     'authentication.apps.AuthenticationConfig',
     'projects.apps.ProjectsConfig',
-
+    'googleoauth.apps.GoogleoauthConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

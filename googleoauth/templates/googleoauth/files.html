@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block content %}
+	{% include 'googleoauth/nav.html' %}
+
+  <div class="card"> 
+  	<table class="table table-bordered mb-0">
+      <thead>
+
+      <tr>
+        <th>Name</th>
+        <th>ID</th>
+        <th>mimeType</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for file in files.files %}
+
+        <tr>
+          <td class="align-middle">{{ file.name }}</td>
+          <td>{{ file.id }}</td>
+          <td>
+            {%if file.mimeType == "application/vnd.google-apps.spreadsheet" %}
+            <form method="post" action="{% url 'googleoauth:view_spreadsheet' %}">{% csrf_token %}
+              <input type="hidden" name="sheet_id" value="{{file.id}}">
+              <button type="submit" class="btn btn-sm btn-success">View</button>
+            </form>
+            {%else%}{{ file.mimeType }}{% endif %}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    
+  </div>
+{% endblock %}

@@ -30,6 +30,8 @@ class ProjectGanttView(LoginRequiredMixin, View):
     template_name = 'projects/graph.html'
 
     def get(self, request, *args, **kwargs):
+        print(request.get_full_path())
+        print(request.build_absolute_uri())
         project_list = []
 
         for project in Project.objects.all():
