@@ -8,9 +8,9 @@
     </ol>
   </nav>
   <div class="card"> 
-    <div class="card-body">
-  	<h3>Google Gantt Chart</h3>
-    <div id="chart_div"></div>
+    <div class="card-body"> 
+  	   <h3>Google Gantt Chart</h3>
+      <div id="chart_div" class="mb-2"></div>
   	</div>
   </div>
 {% endblock %}
@@ -22,7 +22,11 @@
   google.charts.setOnLoadCallback(drawChart);
 
   function daysToMilliseconds(days) {
-    return days * 24 * 60 * 60 * 1000;
+    if (days) {
+      // days = Number(days);
+      return days * 24 * 60 * 60 * 1000;
+    }
+    
   }
 
   function convertToDate(item) {
@@ -31,12 +35,16 @@
   }
 
   function drawChart() {
-    const tasks = {{items|safe}};
+    let tasks = {{items|safe}};
+    // tasks = tasks.slice(0,5); // [tasks[0]];
     tasks.forEach((d, i) => { 
       d[2] = convertToDate(d[2]);
       d[3] = convertToDate(d[3]);
+      d[4] = daysToMilliseconds(d[4]);
       tasks[i] = d;
     });
+
+    
 
     var data = new google.visualization.DataTable();
     data.addColumn('string', 'Task ID');
@@ -50,7 +58,7 @@
     data.addRows(tasks);
 
     var options = {
-      height: 275
+      height: data.getNumberOfRows() * 50,
     };
 
     var chart = new google.visualization.Gantt(document.getElementById('chart_div'));

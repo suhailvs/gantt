@@ -121,30 +121,34 @@ class GetFilesView(View):
 
         return render(request, 'googleoauth/files.html',{'files':files})
 
+def get_spreadsheet(user,sheet_id):
+    credentials = OAuthUsers.objects.get(owner = user)
+    credentials_dict = {
+        'token': credentials.token,
+        'refresh_token': credentials.refresh_token,
+        'token_uri': credentials.token_uri,
+        'client_id': credentials.client_id,
+        'client_secret': credentials.client_secret,
+        'scopes': credentials.get_scopes()
+    }
+
+    credentials = google.oauth2.credentials.Credentials(**credentials_dict)
+
+    drive = googleapiclient.discovery.build(
+      'sheets', 'v4', credentials=credentials)
+
+    sheet = drive.spreadsheets()
+    result = sheet.values().get(spreadsheetId=sheet_id,
+                            range='!A2:G').execute()
+
+    return result.get('values', [])
+
+
 
 class SpreadSheetView(View):
     def get(self, request):
         sheet_id = request.GET['sheet_id']
-        credentials = OAuthUsers.objects.get(owner = request.user)
-        credentials_dict = {
-            'token': credentials.token,
-            'refresh_token': credentials.refresh_token,
-            'token_uri': credentials.token_uri,
-            'client_id': credentials.client_id,
-            'client_secret': credentials.client_secret,
-            'scopes': credentials.get_scopes()
-        }
-
-        credentials = google.oauth2.credentials.Credentials(**credentials_dict)
-
-        drive = googleapiclient.discovery.build(
-          'sheets', 'v4', credentials=credentials)
-
-        sheet = drive.spreadsheets()
-        result = sheet.values().get(spreadsheetId=sheet_id,
-                                range='!A2:E').execute()
-
-        values = result.get('values', [])
+        values = get_spreadsheet(request.user, sheet_id)
 
         if not values:
             return HttpResponse('No data')
@@ -153,8 +157,46 @@ class SpreadSheetView(View):
 
 
 class GoogleChartView(View):
+    def date_to_str(self, date):
+        try: 
+            return date.strftime("%Y-%m-%dT%H:%M:%S%z")
+        except:
+            return None
+
+    def blank_to_none(self, items):
+        new = []
+        for sub_items in items:
+            row = []
+            for item in sub_items:
+                row.append(None if item == '' else item)
+            new.append(row)
+        return new
+
     def get(self, request):
+        values = get_spreadsheet(request.user, request.GET['sheet_id'])
+
+        import pandas as pd
+        import numpy as np
+
+        columns = ['id', 'name', 'dependencies', 'sdate','edate', 'duration', 'progress']
+        df = pd.DataFrame(np.array(values), columns=columns)
+        
+        df['sdate'] = pd.to_datetime(df['sdate']).apply(lambda x: self.date_to_str(x))
+        df['edate'] = pd.to_datetime(df['edate']).apply(lambda x: self.date_to_str(x))
+        df['progress'] = df['progress'].str.replace(r'\D', '').astype(int)
+        # df['duration'] = df['duration'].fillna(None) #.astype(int)
+        # df[list("ABCD")] = df[list("ABCD")].astype(int)
+
+        df=df.reindex(columns=['id', 'name', 'sdate','edate', 'duration', 'progress','dependencies'])
+        # df.fillna(0, inplace=True)
+        # df = df.replace(r'^\s*$', None, regex=True)
+
+        items = df.values.tolist() #list(df.values) #df.values.tolist()
+
+        items = self.blank_to_none(items)
+
+        
         # 'Task ID', 'Task Name', 'Start Date', 'End Date', 'Duration', 'Percent Complete', 'Dependencies'
-        items2 = [["Research","Find sources","2014-12-31T18:30:00.000Z","2015-01-04T18:30:00.000Z",None,100,None],["Write","Write paper",None,"2015-01-08T18:30:00.000Z",259200000,25,"Research,Outline"],["Cite","Create bibliography",None,"2015-01-06T18:30:00.000Z",86400000,20,"Research"],["Complete","Hand in paper",None,"2015-01-09T18:30:00.000Z",86400000,0,"Cite,Write"],["Outline","Outline paper",None,"2015-01-05T18:30:00.000Z",86400000,100,"Research"]]
-        return render(request, 'googleoauth/googlechart.html', {'items':json.dumps(items2)})
+        # items2 = [["Research","Find sources","2014-12-31T18:30:00.000Z","2015-01-04T18:30:00.000Z",None,100,None],["Write","Write paper",None,"2015-01-08T18:30:00.000Z",259200000,25,"Research,Outline"],["Cite","Create bibliography",None,"2015-01-06T18:30:00.000Z",86400000,20,"Research"],["Complete","Hand in paper",None,"2015-01-09T18:30:00.000Z",86400000,0,"Cite,Write"],["Outline","Outline paper",None,"2015-01-05T18:30:00.000Z",86400000,100,"Research"]]
+        return render(request, 'googleoauth/googlechart.html', {'items':json.dumps(items)})
 # GoogleChartView
