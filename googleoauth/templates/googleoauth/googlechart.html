@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'googleoauth:get_files' %}">Files</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{{request.GET.sheet_name}}</li>
+    </ol>
+  </nav>
+  <div class="card"> 
+    <div class="card-body">
+  	<h3>Google Gantt Chart</h3>
+    <div id="chart_div"></div>
+  	</div>
+  </div>
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript">
+  google.charts.load('current', {'packages':['gantt']});
+  google.charts.setOnLoadCallback(drawChart);
+
+  function daysToMilliseconds(days) {
+    return days * 24 * 60 * 60 * 1000;
+  }
+
+  function convertToDate(item) {
+    if (item) return new Date(item);
+    return null
+  }
+
+  function drawChart() {
+    const tasks = {{items|safe}};
+    tasks.forEach((d, i) => { 
+      d[2] = convertToDate(d[2]);
+      d[3] = convertToDate(d[3]);
+      tasks[i] = d;
+    });
+
+    var data = new google.visualization.DataTable();
+    data.addColumn('string', 'Task ID');
+    data.addColumn('string', 'Task Name');
+    data.addColumn('date', 'Start Date');
+    data.addColumn('date', 'End Date');
+    data.addColumn('number', 'Duration');
+    data.addColumn('number', 'Percent Complete');
+    data.addColumn('string', 'Dependencies');
+
+    data.addRows(tasks);
+
+    var options = {
+      height: 275
+    };
+
+    var chart = new google.visualization.Gantt(document.getElementById('chart_div'));
+
+    chart.draw(data, options);
+  }
+</script>
+{% endblock %}

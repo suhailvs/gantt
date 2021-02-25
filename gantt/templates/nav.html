@@ -1,6 +1,6 @@
 {% url 'projects:project_list' as project %}
 
-{% url 'googleoauth:credential_list' as googleoauth %}
+{% url 'googleoauth:get_files' as files %}
 <ul class="nav nav-tabs card-header-tabs">
 <li class="nav-item">
   <a class="nav-link{% if project in request.path %} active{% endif %}" href="{{ project }}">Projects </a>
@@ -16,6 +16,6 @@
   <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Sub Tasks</a>
 </li>
 <li class="nav-item">
-  <a class="nav-link{% if googleoauth in request.path %} active{% endif %}" href="{{ googleoauth }}"> Google Drive</a>
+  <a class="nav-link{% if files in request.path %} active{% endif %}" href="{{ files }}"> Google Drive</a>
 </li>
 </ul>

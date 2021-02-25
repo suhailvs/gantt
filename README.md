@@ -19,3 +19,8 @@ and enable google drive
 Example
 --------
 https://www.analyticsvidhya.com/blog/2020/07/read-and-update-google-spreadsheets-with-python/
+
+
+Writing
+-------
+https://developers.google.com/sheets/api/samples/writing

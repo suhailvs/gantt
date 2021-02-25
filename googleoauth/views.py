@@ -97,7 +97,11 @@ class OAuth2CallbackView(View):
 
 class GetFilesView(View):
     def get(self, request, *args, **kwargs):
-        credentials = OAuthUsers.objects.get(owner = request.user)
+        credentials = OAuthUsers.objects.filter(owner = request.user).first()
+        if not credentials:
+            # if google account not connected, show google login
+            return redirect('googleoauth:login')
+
         credentials_dict = {
             'token': credentials.token,
             'refresh_token': credentials.refresh_token,
@@ -119,8 +123,8 @@ class GetFilesView(View):
 
 
 class SpreadSheetView(View):
-    def post(self, request):
-        sheet_id = request.POST['sheet_id']
+    def get(self, request):
+        sheet_id = request.GET['sheet_id']
         credentials = OAuthUsers.objects.get(owner = request.user)
         credentials_dict = {
             'token': credentials.token,
@@ -148,3 +152,9 @@ class SpreadSheetView(View):
         return render(request, 'googleoauth/sheet.html',{'values':values})
 
 
+class GoogleChartView(View):
+    def get(self, request):
+        # 'Task ID', 'Task Name', 'Start Date', 'End Date', 'Duration', 'Percent Complete', 'Dependencies'
+        items2 = [["Research","Find sources","2014-12-31T18:30:00.000Z","2015-01-04T18:30:00.000Z",None,100,None],["Write","Write paper",None,"2015-01-08T18:30:00.000Z",259200000,25,"Research,Outline"],["Cite","Create bibliography",None,"2015-01-06T18:30:00.000Z",86400000,20,"Research"],["Complete","Hand in paper",None,"2015-01-09T18:30:00.000Z",86400000,0,"Cite,Write"],["Outline","Outline paper",None,"2015-01-05T18:30:00.000Z",86400000,100,"Research"]]
+        return render(request, 'googleoauth/googlechart.html', {'items':json.dumps(items2)})
+# GoogleChartView

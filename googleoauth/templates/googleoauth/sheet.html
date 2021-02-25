@@ -1,16 +1,20 @@
-
-
 {% extends 'base.html' %}
 
-{% block content %}
-	{% include 'googleoauth/nav.html' %}
-
+{% block content %}  
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'googleoauth:get_files' %}">Files</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{{request.GET.sheet_name}}</li>
+    </ol>
+  </nav>
+  <form method="get" action="{% url 'googleoauth:view_chart' %}">
+    <input type="hidden" name="sheet_id" value="{{request.GET.sheet_id}}">
+    <input type="hidden" name="sheet_name" value="{{request.GET.sheet_name}}">
+    <button type="submit" class="btn btn-sm btn-primary mb-3">View Google Chart</button>
+  </form>
   <div class="card"> 
-  	# Print columns A and B, which correspond to indices 0 and 1.
-
   	<table class="table table-bordered mb-0">
       <thead>
-
       <tr>
         <th>#</th>
         <th>A</th>
@@ -19,7 +23,6 @@
     </thead>
     <tbody>
       {% for row in values %}
-
         <tr>
           <td>{{ forloop.counter }}</td>
           <td>{{ row.0 }}</td>
@@ -27,7 +30,7 @@
         </tr>
       {% endfor %}
       </tbody>
-    </table>
-    
+    </table>    
   </div>
 {% endblock %}
+

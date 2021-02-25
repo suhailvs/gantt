@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-	{% include 'googleoauth/nav.html' %}
+	
 
   <div class="card"> 
   	<table class="table table-bordered mb-0">
@@ -21,8 +21,9 @@
           <td>{{ file.id }}</td>
           <td>
             {%if file.mimeType == "application/vnd.google-apps.spreadsheet" %}
-            <form method="post" action="{% url 'googleoauth:view_spreadsheet' %}">{% csrf_token %}
+            <form method="get" action="{% url 'googleoauth:view_spreadsheet' %}">
               <input type="hidden" name="sheet_id" value="{{file.id}}">
+              <input type="hidden" name="sheet_name" value="{{file.name}}">
               <button type="submit" class="btn btn-sm btn-success">View</button>
             </form>
             {%else%}{{ file.mimeType }}{% endif %}</td>
