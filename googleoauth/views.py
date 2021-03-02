@@ -1,4 +1,7 @@
 import os, json
+import pandas as pd
+import numpy as np
+
 import google_auth_oauthlib.flow
 # import requests
 
@@ -21,12 +24,6 @@ from googleoauth.models import GoogleOAuth, OAuthUsers
 class CredentialsListView(LoginRequiredMixin, ListView):
     model = GoogleOAuth
 
-# class CredentialsUpdateView(UpdateView):
-#     model = GoogleOAuth
-#     fields = '__all__'
-#     template_name = 'googleoauth/credentials_update_form.html'
-#     success_url = reverse_lazy('googleoauth:credential_list')
-
 class CredentialsCreateView(LoginRequiredMixin, CreateView):
     model = GoogleOAuth
     fields = ['name','client_secret_filename','redirect_uri','scopes','client_id','client_secret']
@@ -41,7 +38,6 @@ class GoogleAuthView(LoginRequiredMixin, View):
 
     def get(self, request, *args, **kwargs):
         cred = GoogleOAuth.objects.filter(status=True).first()
-
         if not cred:
             return HttpResponse('no credentials found')
 
@@ -144,18 +140,6 @@ def get_spreadsheet(user,sheet_id):
     return result.get('values', [])
 
 
-
-class SpreadSheetView(View):
-    def get(self, request):
-        sheet_id = request.GET['sheet_id']
-        values = get_spreadsheet(request.user, sheet_id)
-
-        if not values:
-            return HttpResponse('No data')
- 
-        return render(request, 'googleoauth/sheet.html',{'values':values})
-
-
 class GoogleChartView(View):
     def date_to_str(self, date):
         try: 
@@ -172,31 +156,28 @@ class GoogleChartView(View):
             new.append(row)
         return new
 
+    def post(self, request):
+        # update cell in google sheet
+        print(request.POST)
+        # row,column_name,item
+        response = redirect('googleoauth:chart')
+        response['Location'] += f"?sheet_id={request.POST['sheet_id']}&sheet_name={request.POST['sheet_name']}"
+        return response
+
     def get(self, request):
         values = get_spreadsheet(request.user, request.GET['sheet_id'])
-
-        import pandas as pd
-        import numpy as np
-
+        
         columns = ['id', 'name', 'dependencies', 'sdate','edate', 'duration', 'progress']
         df = pd.DataFrame(np.array(values), columns=columns)
         
         df['sdate'] = pd.to_datetime(df['sdate']).apply(lambda x: self.date_to_str(x))
         df['edate'] = pd.to_datetime(df['edate']).apply(lambda x: self.date_to_str(x))
         df['progress'] = df['progress'].str.replace(r'\D', '').astype(int)
-        # df['duration'] = df['duration'].fillna(None) #.astype(int)
-        # df[list("ABCD")] = df[list("ABCD")].astype(int)
 
         df=df.reindex(columns=['id', 'name', 'sdate','edate', 'duration', 'progress','dependencies'])
-        # df.fillna(0, inplace=True)
-        # df = df.replace(r'^\s*$', None, regex=True)
 
         items = df.values.tolist() #list(df.values) #df.values.tolist()
 
         items = self.blank_to_none(items)
-
-        
-        # 'Task ID', 'Task Name', 'Start Date', 'End Date', 'Duration', 'Percent Complete', 'Dependencies'
-        # items2 = [["Research","Find sources","2014-12-31T18:30:00.000Z","2015-01-04T18:30:00.000Z",None,100,None],["Write","Write paper",None,"2015-01-08T18:30:00.000Z",259200000,25,"Research,Outline"],["Cite","Create bibliography",None,"2015-01-06T18:30:00.000Z",86400000,20,"Research"],["Complete","Hand in paper",None,"2015-01-09T18:30:00.000Z",86400000,0,"Cite,Write"],["Outline","Outline paper",None,"2015-01-05T18:30:00.000Z",86400000,100,"Research"]]
+        # items2 = [["Research","Find sources","2014-12-31T18:30:00.000Z","2015-01-04T18:30:00.000Z",None,100,None],]
         return render(request, 'googleoauth/googlechart.html', {'items':json.dumps(items)})
-# GoogleChartView

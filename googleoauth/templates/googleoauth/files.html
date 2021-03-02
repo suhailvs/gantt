@@ -1,36 +1,30 @@
 {% extends 'base.html' %}
 
 {% block content %}
-	
-
   <div class="card"> 
   	<table class="table table-bordered mb-0">
       <thead>
-
       <tr>
         <th>Name</th>
-        <th>ID</th>
-        <th>mimeType</th>
+        <th></th>
       </tr>
     </thead>
     <tbody>
       {% for file in files.files %}
-
+        {%if file.mimeType == "application/vnd.google-apps.spreadsheet" %}
         <tr>
           <td class="align-middle">{{ file.name }}</td>
-          <td>{{ file.id }}</td>
           <td>
-            {%if file.mimeType == "application/vnd.google-apps.spreadsheet" %}
-            <form method="get" action="{% url 'googleoauth:view_spreadsheet' %}">
+            <form method="get" action="{% url 'googleoauth:chart' %}">
               <input type="hidden" name="sheet_id" value="{{file.id}}">
               <input type="hidden" name="sheet_name" value="{{file.name}}">
-              <button type="submit" class="btn btn-sm btn-success">View</button>
-            </form>
-            {%else%}{{ file.mimeType }}{% endif %}</td>
+              <button type="submit" class="btn btn-sm btn-info">Chart</button>
+            </form>            
+          </td>
         </tr>
+        {% endif %}
       {% endfor %}
       </tbody>
-    </table>
-    
+    </table>    
   </div>
 {% endblock %}

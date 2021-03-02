@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 
+{% load static %}
 {% block content %}
   <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
@@ -9,13 +10,52 @@
   </nav>
   <div class="card"> 
     <div class="card-body"> 
-  	   <h3>Google Gantt Chart</h3>
+      <form id="#frm_task_edit" method="post" action="{% url 'googleoauth:chart' %}">
+        {% csrf_token %}
+        <!-- ['id', 'name', 'sdate','edate', 'duration', 'progress','dependencies']-->
+        <input type="hidden" name="sheet_name" value="{{request.GET.sheet_name}}">
+        <input type="hidden" name="sheet_id" value="{{request.GET.sheet_id}}">
+        <input type="hidden" name="row" id="row">
+        <div class="form-row">
+          <div class="form-group col-md-1">
+            <label for="id">Task ID</label>
+            <input type="text" class="form-control" name="id" id="id" onchange="updateTask('id')" readonly="">
+          </div>
+          <div class="form-group col-md-3">
+            <label for="name">Task Name</label>
+            <input type="text" class="form-control" name="name" id="name" onchange="updateTask('name')">
+          </div>
+          <div class="form-group col-md-2">
+            <label for="sdate">Start Date</label>
+            <input type="date" class="form-control" name="sdate" id="sdate" onchange="updateTask('sdate')">
+          </div>
+          <div class="form-group col-md-2">
+            <label for="edate">End Date</label>
+            <input type="date" class="form-control" name="edate" id="edate" onchange="updateTask('edate')">
+          </div>
+          <div class="form-group col-md-1">
+            <label for="duration">Duration</label>
+            <input type="number" class="form-control" name="duration" id="duration" onchange="updateTask('duration')">
+          </div>
+          <div class="form-group col-md-1">
+            <label for="progress">Progress%</label>
+            <input type="number" class="form-control" name="progress" id="progress" onchange="updateTask('progress')">
+          </div>
+          <div class="form-group col-md-2">
+            <label for="dependencies">Dependencies</label>
+            <input type="text" class="form-control" name="dependencies" id="dependencies" onchange="updateTask('dependencies')">
+          </div>
+          
+        </div>
+        <button class="btn btn-success btn-sm">Update</button>
+      </form>
       <div id="chart_div" class="mb-2"></div>
   	</div>
   </div>
 {% endblock %}
 
 {% block js %}
+<script type="text/javascript" src="{% static 'js/moment.js' %}"></script>
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script type="text/javascript">
   google.charts.load('current', {'packages':['gantt']});
@@ -25,8 +65,7 @@
     if (days) {
       // days = Number(days);
       return days * 24 * 60 * 60 * 1000;
-    }
-    
+    }    
   }
 
   function convertToDate(item) {
@@ -42,9 +81,7 @@
       d[3] = convertToDate(d[3]);
       d[4] = daysToMilliseconds(d[4]);
       tasks[i] = d;
-    });
-
-    
+    });    
 
     var data = new google.visualization.DataTable();
     data.addColumn('string', 'Task ID');
@@ -64,6 +101,35 @@
     var chart = new google.visualization.Gantt(document.getElementById('chart_div'));
 
     chart.draw(data, options);
+    // click event
+    google.visualization.events.addListener(chart, 'select', function() {
+      if($.isEmptyObject(chart.getSelection())) {  
+        $('form').find("input:not([type='hidden'])").val("");
+        // $("form").trigger('reset');
+        return;
+      }
+      
+      const row = tasks[chart.getSelection()[0].row];
+      // alert(tasks[row]);
+      $('#row').val(chart.getSelection()[0].row);
+      $('#id').val(row[0]);
+      $('#name').val(row[1]);
+      $('#sdate').val(moment(row[2]).format('YYYY-MM-DD'));
+      $('#edate').val(moment(row[3]).format('YYYY-MM-DD'));
+      $('#duration').val(row[4]/(24 * 60 * 60 * 1000));
+      $('#progress').val(row[5]);
+      $('#dependencies').val(row[6]);
+      
+    });
+  }
+
+  function updateTask(item) {
+    console.log(item);
+    // $.post("{% url 'googleoauth:chart' %}", { row:$("#row").val(),column_name: item, 
+    //   data: $("#"+item).val(), csrfmiddlewaretoken: '{{ csrf_token }}'})
+    //   .done(function(data) {
+    //     alert("Data Loaded: " + data);
+    //   });
   }
 </script>
 {% endblock %}

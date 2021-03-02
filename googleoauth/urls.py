@@ -9,6 +9,7 @@ urlpatterns = [
     path('credential_add/', views.CredentialsCreateView.as_view(), name='credential_add'),
     path('login/', views.GoogleAuthView.as_view(), name='login'),
     path('', views.GetFilesView.as_view(), name='get_files'),
-    path('view_spreadsheet/', views.SpreadSheetView.as_view(), name='view_spreadsheet'),
-    path('view_chart/', views.GoogleChartView.as_view(), name='view_chart'),
+    # path('view_spreadsheet/', views.SpreadSheetView.as_view(), name='view_spreadsheet'),
+    path('chart/', views.GoogleChartView.as_view(), name='chart'),
+
 ]
