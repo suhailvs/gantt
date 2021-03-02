@@ -16,7 +16,7 @@ from django.views.generic import CreateView, ListView, UpdateView
 from django.contrib import messages
 from django.views import View
 from django.urls import reverse_lazy
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 
 from googleoauth.models import GoogleOAuth, OAuthUsers
 
@@ -117,30 +117,27 @@ class GetFilesView(View):
 
         return render(request, 'googleoauth/files.html',{'files':files})
 
-def get_spreadsheet(user,sheet_id):
-    credentials = OAuthUsers.objects.get(owner = user)
-    credentials_dict = {
-        'token': credentials.token,
-        'refresh_token': credentials.refresh_token,
-        'token_uri': credentials.token_uri,
-        'client_id': credentials.client_id,
-        'client_secret': credentials.client_secret,
-        'scopes': credentials.get_scopes()
-    }
 
-    credentials = google.oauth2.credentials.Credentials(**credentials_dict)
-
-    drive = googleapiclient.discovery.build(
-      'sheets', 'v4', credentials=credentials)
-
-    sheet = drive.spreadsheets()
-    result = sheet.values().get(spreadsheetId=sheet_id,
-                            range='!A2:G').execute()
-
-    return result.get('values', [])
 
 
 class GoogleChartView(View):
+    def get_spreadsheet_api(self, user):
+        credentials = OAuthUsers.objects.get(owner = user)
+        credentials_dict = {
+            'token': credentials.token,
+            'refresh_token': credentials.refresh_token,
+            'token_uri': credentials.token_uri,
+            'client_id': credentials.client_id,
+            'client_secret': credentials.client_secret,
+            'scopes': credentials.get_scopes()
+        }
+
+        credentials = google.oauth2.credentials.Credentials(**credentials_dict)
+
+        sheets = googleapiclient.discovery.build(
+          'sheets', 'v4', credentials=credentials)
+        return sheets.spreadsheets()
+
     def date_to_str(self, date):
         try: 
             return date.strftime("%Y-%m-%dT%H:%M:%S%z")
@@ -156,16 +153,9 @@ class GoogleChartView(View):
             new.append(row)
         return new
 
-    def post(self, request):
-        # update cell in google sheet
-        print(request.POST)
-        # row,column_name,item
-        response = redirect('googleoauth:chart')
-        response['Location'] += f"?sheet_id={request.POST['sheet_id']}&sheet_name={request.POST['sheet_name']}"
-        return response
-
-    def get(self, request):
-        values = get_spreadsheet(request.user, request.GET['sheet_id'])
+    def get_spreadsheet_data(self, sheet, sheet_id, sheet_range='!A2:G'):
+        result = sheet.values().get(spreadsheetId=sheet_id,range=sheet_range).execute()
+        values = result.get('values', [])
         
         columns = ['id', 'name', 'dependencies', 'sdate','edate', 'duration', 'progress']
         df = pd.DataFrame(np.array(values), columns=columns)
@@ -178,6 +168,31 @@ class GoogleChartView(View):
 
         items = df.values.tolist() #list(df.values) #df.values.tolist()
 
-        items = self.blank_to_none(items)
+        return self.blank_to_none(items)
+
+    def post(self, request):
+        # update cell in google sheet
+        # 'row': ['3'], 'column_name': ['progress'], 'data': ['1']
+        row = int(request.POST['row'])+2 # skip Heading and make it start from 1
+        column= request.POST['column_name']
+        data = request.POST['data']
+        columns={'id':'A', 'name':'B', 'dependencies':'C','sdate':'D','edate':'E', 'duration':'F', 
+            'progress':'G'}
+
+        sheet_range = f'!{columns[column]}{row}'
+        body = {
+            'values': [[data]]
+        }
+        sheet = self.get_spreadsheet_api(request.user)
+        result = sheet.values().update(
+            spreadsheetId=request.POST['sheet_id'], range=sheet_range,
+            valueInputOption='RAW', body=body).execute()
+
+        items = self.get_spreadsheet_data(sheet,request.POST['sheet_id'])
+        return JsonResponse(items, safe=False)
+
+    def get(self, request):
+        sheet = self.get_spreadsheet_api(request.user)
+        items = self.get_spreadsheet_data(sheet,request.GET['sheet_id'])
         # items2 = [["Research","Find sources","2014-12-31T18:30:00.000Z","2015-01-04T18:30:00.000Z",None,100,None],]
-        return render(request, 'googleoauth/googlechart.html', {'items':json.dumps(items)})
+        return render(request, 'googleoauth/googlechart.html', {'items':json.dumps(items)}) # 'tasks':df.id.tolist()})

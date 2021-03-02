@@ -1,6 +1,10 @@
 {% extends 'base.html' %}
 
 {% load static %}
+{% block css %}
+<!-- <link rel="stylesheet" href="https://selectize.github.io/selectize.js/css/selectize.default.css" data-theme="default"> -->
+    {% endblock %}
+
 {% block content %}
   <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
@@ -11,10 +15,10 @@
   <div class="card"> 
     <div class="card-body"> 
       <form id="#frm_task_edit" method="post" action="{% url 'googleoauth:chart' %}">
-        {% csrf_token %}
+        <!-- {% csrf_token %} -->
         <!-- ['id', 'name', 'sdate','edate', 'duration', 'progress','dependencies']-->
-        <input type="hidden" name="sheet_name" value="{{request.GET.sheet_name}}">
-        <input type="hidden" name="sheet_id" value="{{request.GET.sheet_id}}">
+        <!-- <input type="hidden" name="sheet_name" value="{{request.GET.sheet_name}}">
+        <input type="hidden" name="sheet_id" value="{{request.GET.sheet_id}}"> -->
         <input type="hidden" name="row" id="row">
         <div class="form-row">
           <div class="form-group col-md-1">
@@ -44,10 +48,17 @@
           <div class="form-group col-md-2">
             <label for="dependencies">Dependencies</label>
             <input type="text" class="form-control" name="dependencies" id="dependencies" onchange="updateTask('dependencies')">
+            <!-- <select id="dependencies" name="dependencies[]" multiple onchange="updateTask('dependencies')">
+              <option value=""></option>
+              {% for item in tasks %}<option value="{{item}}">{{item}}</option>{%endfor %}
+            </select> -->
           </div>
           
         </div>
-        <button class="btn btn-success btn-sm">Update</button>
+        <div id="ajaxspinner" role="status">
+          <span class="sr-only">Saving...</span>
+        </div>
+        <!-- <button class="btn btn-success btn-sm">Update</button> -->
       </form>
       <div id="chart_div" class="mb-2"></div>
   	</div>
@@ -56,10 +67,13 @@
 
 {% block js %}
 <script type="text/javascript" src="{% static 'js/moment.js' %}"></script>
+<!-- <script src="https://selectize.github.io/selectize.js/js/selectize.js"></script> -->
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script type="text/javascript">
   google.charts.load('current', {'packages':['gantt']});
-  google.charts.setOnLoadCallback(drawChart);
+  google.charts.setOnLoadCallback(onInit);
+
+  // let $select = $('#dependencies').selectize();
 
   function daysToMilliseconds(days) {
     if (days) {
@@ -73,8 +87,14 @@
     return null
   }
 
-  function drawChart() {
+  function onInit() {
+    $("form").trigger('reset');
     let tasks = {{items|safe}};
+    drawChart(tasks)
+  }
+
+  function drawChart(tasks) {
+    // let tasks = {{items|safe}};
     // tasks = tasks.slice(0,5); // [tasks[0]];
     tasks.forEach((d, i) => { 
       d[2] = convertToDate(d[2]);
@@ -83,7 +103,7 @@
       tasks[i] = d;
     });    
 
-    var data = new google.visualization.DataTable();
+    let data = new google.visualization.DataTable();
     data.addColumn('string', 'Task ID');
     data.addColumn('string', 'Task Name');
     data.addColumn('date', 'Start Date');
@@ -94,18 +114,18 @@
 
     data.addRows(tasks);
 
-    var options = {
+    let options = {
       height: data.getNumberOfRows() * 50,
     };
 
-    var chart = new google.visualization.Gantt(document.getElementById('chart_div'));
+    let chart = new google.visualization.Gantt(document.getElementById('chart_div'));
 
     chart.draw(data, options);
     // click event
     google.visualization.events.addListener(chart, 'select', function() {
       if($.isEmptyObject(chart.getSelection())) {  
-        $('form').find("input:not([type='hidden'])").val("");
-        // $("form").trigger('reset');
+        // $('form').find("input:not([type='hidden'])").val("");
+        $("form").trigger('reset');
         return;
       }
       
@@ -118,18 +138,27 @@
       $('#edate').val(moment(row[3]).format('YYYY-MM-DD'));
       $('#duration').val(row[4]/(24 * 60 * 60 * 1000));
       $('#progress').val(row[5]);
+      // if (row[6]) {
+      //   let selectize = $select[0].selectize;
+      //   selectize.setValue(selectize.search(row[6]).items[0].id);
+      //   alert(row[6]);
+      // }
       $('#dependencies').val(row[6]);
       
     });
   }
+  
 
   function updateTask(item) {
-    console.log(item);
-    // $.post("{% url 'googleoauth:chart' %}", { row:$("#row").val(),column_name: item, 
-    //   data: $("#"+item).val(), csrfmiddlewaretoken: '{{ csrf_token }}'})
-    //   .done(function(data) {
-    //     alert("Data Loaded: " + data);
-    //   });
+    // console.log(item);
+    $("#ajaxspinner").addClass('spinner-border');
+    $.post("{% url 'googleoauth:chart' %}", { sheet_id:"{{request.GET.sheet_id}}",row:$("#row").val(),
+      column_name: item, data: $("#"+item).val(), csrfmiddlewaretoken: '{{ csrf_token }}'})
+      .done(function(tasks) {
+        // alert("Data Loaded: " + data);
+        $("#ajaxspinner").removeClass('spinner-border');
+        drawChart(tasks);
+      });
   }
 </script>
 {% endblock %}
