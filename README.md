@@ -24,3 +24,4 @@ https://www.analyticsvidhya.com/blog/2020/07/read-and-update-google-spreadsheets
 Writing
 -------
 https://developers.google.com/sheets/api/samples/writing
+https://developers.google.com/sheets/api/guides/values

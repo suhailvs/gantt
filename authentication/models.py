@@ -11,6 +11,7 @@ class User(AbstractUser):
       (5, 'others'),
     )
     user_type = models.PositiveSmallIntegerField(choices=USER_TYPE_CHOICES,default=1)
+    company = models.ForeignKey('company.Company', on_delete=models.CASCADE, null=True)
 
     @property
     def is_administrator(self):

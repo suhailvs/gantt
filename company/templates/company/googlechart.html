@@ -8,13 +8,13 @@
 {% block content %}
   <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
-      <li class="breadcrumb-item"><a href="{% url 'googleoauth:get_files' %}">Files</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'company:get_files' %}">Files</a></li>
       <li class="breadcrumb-item active" aria-current="page">{{request.GET.sheet_name}}</li>
     </ol>
   </nav>
   <div class="card"> 
     <div class="card-body"> 
-      <form id="#frm_task_edit" method="post" action="{% url 'googleoauth:chart' %}">
+      <form id="#frm_task_edit" method="post" action="{% url 'company:chart' %}">
         <!-- {% csrf_token %} -->
         <!-- ['id', 'name', 'sdate','edate', 'duration', 'progress','dependencies']-->
         <!-- <input type="hidden" name="sheet_name" value="{{request.GET.sheet_name}}">

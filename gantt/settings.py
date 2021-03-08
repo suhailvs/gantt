@@ -31,6 +31,7 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
+'company.apps.CompanyConfig',
     'authentication.apps.AuthenticationConfig',
     'projects.apps.ProjectsConfig',
     'googleoauth.apps.GoogleoauthConfig',

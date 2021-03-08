@@ -26,6 +26,7 @@ urlpatterns = [
     path('authentication/', include('authentication.urls')),
     path('projects/', include('projects.urls')),
     path('googleoauth/', include('googleoauth.urls')),
+    path('company/', include('company.urls')),
     path('oauthredirect/',OAuth2CallbackView.as_view()),
 
     path('accounts/login/', auth_views.LoginView.as_view(redirect_authenticated_user=True), name='login'),

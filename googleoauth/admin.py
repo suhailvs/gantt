@@ -4,5 +4,4 @@ from django.contrib import admin
 from .models import GoogleOAuth, OAuthUsers
 
 admin.site.register(GoogleOAuth)
-
 admin.site.register(OAuthUsers)

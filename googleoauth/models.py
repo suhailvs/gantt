@@ -29,6 +29,20 @@ class OAuthUsers(models.Model):
     client_secret =  models.TextField()
     scopes = models.TextField()
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-
+    status = models.BooleanField(default=True)
+    
     def get_scopes(self):
         return json.loads(self.scopes)
+
+    def get_credentials_dict(self):
+        return {
+            'token': self.token,
+            'refresh_token': self.refresh_token,
+            'token_uri': self.token_uri,
+            'client_id': self.client_id,
+            'client_secret': self.client_secret,
+            'scopes': self.get_scopes()
+        }
+
+    def __str__(self):
+        return f'{self.name}({self.status})'

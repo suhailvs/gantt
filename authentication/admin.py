@@ -9,7 +9,8 @@ from django.contrib.auth.admin import UserAdmin
 class CustomUserAdmin(UserAdmin):
     fieldsets = (
         *UserAdmin.fieldsets,  # original form fieldsets, expanded
-        ('User Type', {'fields': ('user_type',),},),
+        ('User Type', {'fields': ('user_type',)}),
+        ('Company', {'fields': ('company',)})
     )
 
 admin.site.register(get_user_model(), CustomUserAdmin)
