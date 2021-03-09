@@ -11,7 +11,7 @@ class GoogleOAuth(models.Model):
     client_secret_filename = models.CharField(max_length=200, default='client_secret_1.json') 
     redirect_uri = models.CharField(max_length=200, default='')
     # ["https://www.googleapis.com/auth/drive","https://www.googleapis.com/auth/drive.file"]
-    scopes = models.TextField(default = '["https://www.googleapis.com/auth/spreadsheets","https://www.googleapis.com/auth/drive","https://www.googleapis.com/auth/drive.file"]')    
+    scopes = models.TextField(default = '["https://www.googleapis.com/auth/spreadsheets.readonly","https://www.googleapis.com/auth/drive","https://www.googleapis.com/auth/drive.file"]')    
     client_id = models.TextField()
     client_secret =  models.TextField()
     status = models.BooleanField(default=True)

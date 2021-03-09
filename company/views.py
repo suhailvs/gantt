@@ -8,33 +8,45 @@ import googleapiclient.discovery
 
 from django.shortcuts import render, redirect
 from django.views import View
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, Http404
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 from googleoauth.models import OAuthUsers
 
+def get_credentials(app = 'drive'):
+    """
+    for drive use:
+        drive = get_credentials()
+        files = drive.files()
+        
+    for spreadsheet use:
+        sheet = get_credentials('sheets')
+        sheet.spreadsheets()
+    """
+    credentials = OAuthUsers.objects.filter(status=True).first()
+    if not credentials:
+        # if google account not connected, show google login
+        # return JsonResponse({'status':'false','message':'There is no google accounts connected.'}, status=500) #redirect('googleoauth:login')
+        raise Http404('There is no active google accounts. Please set a google account active or connect a new account.')
+    
+    credentials = google.oauth2.credentials.Credentials(**credentials.get_credentials_dict())
+    if app=='drive':
+        version = 'v3'
+    elif app == 'sheets':
+        version = 'v4'
+    return googleapiclient.discovery.build(app, version, credentials=credentials)
 
 class GetFilesView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
-        credentials = OAuthUsers.objects.filter(status=True).first()
-        if not credentials:
-            # if google account not connected, show google login
-            return redirect('googleoauth:login')
+        drive = get_credentials()
+        # files = drive.files().list().execute()
+        files = drive.files().list(q=f"'{request.user.company.folder_id}' in parents",
+            spaces='drive',fields='nextPageToken, files(id, name, mimeType)',pageToken=None).execute()
 
-        
-        credentials = google.oauth2.credentials.Credentials(**credentials.get_credentials_dict())
-        drive = googleapiclient.discovery.build('drive', 'v3', credentials=credentials)
-        files = drive.files().list().execute()
         return render(request, 'company/files.html',{'files':files})
 
 
 class GoogleChartView(LoginRequiredMixin, View):
-    def get_spreadsheet_api(self, user):
-        credentials = OAuthUsers.objects.get(owner = user)
-        credentials = google.oauth2.credentials.Credentials(**credentials.get_credentials_dict())
-        sheets = googleapiclient.discovery.build( 'sheets', 'v4', credentials=credentials)
-        return sheets.spreadsheets()
-
     def date_to_str(self, date):
         try: 
             return date.strftime("%Y-%m-%dT%H:%M:%S%z")
@@ -80,8 +92,8 @@ class GoogleChartView(LoginRequiredMixin, View):
         body = {
             'values': [[data]]
         }
-        sheet = self.get_spreadsheet_api(request.user)
-        result = sheet.values().update(
+        sheet = get_credentials('sheets')
+        result = sheet.spreadsheets().values().update(
             spreadsheetId=request.POST['sheet_id'], range=sheet_range,
             valueInputOption='RAW', body=body).execute()
 
@@ -89,7 +101,7 @@ class GoogleChartView(LoginRequiredMixin, View):
         return JsonResponse(items, safe=False)
 
     def get(self, request):
-        sheet = self.get_spreadsheet_api(request.user)
-        items = self.get_spreadsheet_data(sheet,request.GET['sheet_id'])
+        sheet = get_credentials('sheets')
+        items = self.get_spreadsheet_data(sheet.spreadsheets(),request.GET['sheet_id'])
         # items2 = [["Research","Find sources","2014-12-31T18:30:00.000Z","2015-01-04T18:30:00.000Z",None,100,None],]
         return render(request, 'company/googlechart.html', {'items':json.dumps(items)}) # 'tasks':df.id.tolist()})

@@ -1,11 +1,11 @@
 {% url 'projects:project_list' as project %}
 
 {% url 'company:get_files' as files %}
-<ul class="nav nav-tabs card-header-tabs">
-<li class="nav-item">
-  <a class="nav-link{% if project in request.path %} active{% endif %}" href="{{ project }}">Projects </a>
-</li>
 
+<ul class="nav nav-tabs card-header-tabs">
+<!-- <li class="nav-item">
+  <a class="nav-link{% if project in request.path %} active{% endif %}" href="{{ project }}">Projects </a>
+</li> 
 <li class="nav-item">
   <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Processes</a>
 </li>
@@ -14,8 +14,15 @@
 </li>
 <li class="nav-item">
   <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Sub Tasks</a>
+</li> -->
+
+<li class="nav-item">
+  <a class="nav-link{% if files in request.path %} active{% endif %}" href="{{ files }}"> Folders</a>
 </li>
 <li class="nav-item">
-  <a class="nav-link{% if files in request.path %} active{% endif %}" href="{{ files }}"> Google Drive</a>
+  <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Milestone/Process</a>
+</li>
+<li class="nav-item">
+  <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Tasks</a>
 </li>
 </ul>

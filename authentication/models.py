@@ -10,7 +10,7 @@ class User(AbstractUser):
       (4, 'viewer'),
       (5, 'others'),
     )
-    user_type = models.PositiveSmallIntegerField(choices=USER_TYPE_CHOICES,default=1)
+    user_type = models.PositiveSmallIntegerField(choices=USER_TYPE_CHOICES,default=2)
     company = models.ForeignKey('company.Company', on_delete=models.CASCADE, null=True)
 
     @property

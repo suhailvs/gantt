@@ -2,6 +2,7 @@
 
 {% block content %}
   <div class="card"> 
+    <h4>{{user.company.name}}</h4>
   	<table class="table table-bordered mb-0">
       <thead>
       <tr>
@@ -11,18 +12,20 @@
     </thead>
     <tbody>
       {% for file in files.files %}
-        {%if file.mimeType == "application/vnd.google-apps.spreadsheet" %}
+        
         <tr>
           <td class="align-middle">{{ file.name }}</td>
           <td>
-            <form method="get" action="{% url 'googleoauth:chart' %}">
+            {%if file.mimeType == "application/vnd.google-apps.spreadsheet" %}
+            <form method="get" action="{% url 'company:chart' %}">
               <input type="hidden" name="sheet_id" value="{{file.id}}">
               <input type="hidden" name="sheet_name" value="{{file.name}}">
               <button type="submit" class="btn btn-sm btn-info">Chart</button>
-            </form>            
+            </form>
+            {% endif %}
           </td>
         </tr>
-        {% endif %}
+        
       {% endfor %}
       </tbody>
     </table>    
